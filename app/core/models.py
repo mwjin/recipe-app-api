@@ -1,4 +1,8 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.db import models
 
 
@@ -20,18 +24,17 @@ class MyUserManager(BaseUserManager):
     def create_superuser(self, email, password):
         """Create and save a new superuser with given details"""
         user = self.create_user(email, password)
-        user.is_admin = True
+        user.is_superuser = True
         user.save(using=self._db)
 
         return user
 
 
-class MyUser(AbstractBaseUser):
+class MyUser(AbstractBaseUser, PermissionsMixin):
     """Database model for users in the system"""
 
     email = models.EmailField(max_length=255, unique=True)
     is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
 
     objects = MyUserManager()
 
@@ -43,4 +46,4 @@ class MyUser(AbstractBaseUser):
 
     @property
     def is_staff(self):
-        return self.is_admin
+        return self.is_superuser
