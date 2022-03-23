@@ -6,7 +6,7 @@ from django.contrib.auth.models import (
 from django.db import models
 
 
-class MyUserManager(BaseUserManager):
+class UserManager(BaseUserManager):
     """Manager for my custom user model"""
 
     def create_user(self, email, password=None, **extra_fields):
@@ -31,7 +31,7 @@ class MyUserManager(BaseUserManager):
         return user
 
 
-class MyUser(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin):
     """Database model for users in the system"""
 
     email = models.EmailField(max_length=255, unique=True)
@@ -39,7 +39,7 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    objects = MyUserManager()
+    objects = UserManager()
 
     USERNAME_FIELD = "email"
 
