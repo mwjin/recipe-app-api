@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
@@ -51,7 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Tag(models.Model):
     """Tag to be used for a recipe"""
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
 
     def __str__(self):
