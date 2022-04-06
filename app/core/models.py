@@ -46,3 +46,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         """Returning string representation of our user"""
         return self.email
+
+
+class Tag(models.Model):
+    """Tag to be used for a recipe"""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        """Returning string representation of our tag model"""
+        return self.name
