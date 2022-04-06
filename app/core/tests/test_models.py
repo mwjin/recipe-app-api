@@ -2,7 +2,12 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 
 
-class TestUser(TestCase):
+def sample_user(email="test@test.com", password="testpass1234"):
+    """Create a sample user"""
+    return get_user_model().objects.create_user(email, password)
+
+
+class UserTests(TestCase):
     def test_create_user_with_email_successful(self):
         """Test creating a new user with an email is successful"""
         email = "test@test.com"
