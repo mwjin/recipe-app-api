@@ -75,3 +75,19 @@ class Ingredient(models.Model):
     def __str__(self):
         """Returning string representation of our tag model"""
         return self.name
+
+
+class Recipe(models.Model):
+    """Database model for recipes"""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    title = models.CharField(max_length=255)
+    time_minutes = models.IntegerField()
+    price = models.FloatField()
+
+    def __str__(self) -> str:
+        """Returning string representation of our recipe model"""
+        return self.title
