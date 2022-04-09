@@ -61,3 +61,17 @@ class Tag(models.Model):
     def __str__(self):
         """Returning string representation of our tag model"""
         return self.name
+
+
+class Ingredient(models.Model):
+    """Ingredient to be used for a recipe"""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        """Returning string representation of our tag model"""
+        return self.name
