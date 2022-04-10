@@ -193,3 +193,34 @@ class PrivateRecipeApiTests(TestCase):
         resp = self.client.post(RECIPES_URL, payload)
 
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_partial_update_recipe(self):
+        """Test updating a recipe with PATCH method"""
+        recipe = sample_recipe(user=self.user)
+        recipe.tags.add(sample_tag(user=self.user, name="Old"))
+        new_tag = sample_tag(user=self.user, name="New")
+
+        payload = {"title": "Chicken", "tags": [new_tag.id]}
+        resp = self.client.patch(detail_url(recipe.id), payload)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.title, payload["title"])
+        tags = recipe.tags.all()
+        self.assertEqual(len(tags), 1)
+        self.assertIn(new_tag, tags)
+
+    def test_full_update_recipe(self):
+        """Test updating a recipe with PUT method"""
+        recipe = sample_recipe(user=self.user)
+        recipe.tags.add(sample_tag(user=self.user, name="Old"))
+
+        payload = {"title": "Chicken", "time_minutes": 25, "price": 14.00}
+        resp = self.client.put(detail_url(recipe.id), payload)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.title, payload["title"])
+        self.assertEqual(recipe.time_minutes, payload["time_minutes"])
+        self.assertEqual(recipe.price, payload["price"])
+        self.assertEqual(len(recipe.tags.all()), 0)
