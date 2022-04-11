@@ -89,7 +89,9 @@ class PrivateRecipeApiTests(TestCase):
         sample_recipe(user=self.user)
         sample_recipe(user=another_user)
 
-        recipes = Recipe.objects.all().order_by("-title").filter(user=self.user)
+        recipes = (
+            Recipe.objects.all().order_by("-title").filter(user=self.user)
+        )
         serializer = RecipeSerializer(recipes, many=True)
 
         resp = self.client.get(RECIPES_URL)
@@ -265,3 +267,59 @@ class RecipeImageUploadTests(TestCase):
         url = image_upload_url(self.recipe.id)
         resp = self.client.post(url, {"image": "no_image"}, format="multipart")
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class RecipeFilterTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            "test@test.com",
+            "testpass1234",
+        )
+        self.client.force_authenticate(self.user)
+        self.recipe = sample_recipe(user=self.user)
+
+    def tearDown(self):
+        self.recipe.image.delete()
+
+    def test_filter_recipes_by_tags(self):
+        """Test returning recipes with specific tags"""
+        recipe1 = sample_recipe(user=self.user, title="Recipe 1")
+        recipe2 = sample_recipe(user=self.user, title="Recipe 2")
+        recipe3 = sample_recipe(user=self.user, title="Recipe 3")
+        tag1 = sample_tag(user=self.user, name="Tag 1")
+        tag2 = sample_tag(user=self.user, name="Tag 2")
+        recipe1.tags.add(tag1)
+        recipe2.tags.add(tag2)
+
+        resp = self.client.get(RECIPES_URL, {"tags": f"{tag1.id},{tag2.id}"})
+
+        serializer1 = RecipeSerializer(recipe1)
+        serializer2 = RecipeSerializer(recipe2)
+        serializer3 = RecipeSerializer(recipe3)
+
+        self.assertIn(serializer1.data, resp.data)
+        self.assertIn(serializer2.data, resp.data)
+        self.assertNotIn(serializer3.data, resp.data)
+
+    def test_filter_recipes_by_ingredients(self):
+        """Test returning recipes with specific tags"""
+        recipe1 = sample_recipe(user=self.user, title="Recipe 1")
+        recipe2 = sample_recipe(user=self.user, title="Recipe 2")
+        recipe3 = sample_recipe(user=self.user, title="Recipe 3")
+        ingredient1 = sample_ingredient(user=self.user, name="Ingredient 1")
+        ingredient2 = sample_ingredient(user=self.user, name="Ingredient 2")
+        recipe1.ingredients.add(ingredient1)
+        recipe2.ingredients.add(ingredient2)
+
+        resp = self.client.get(
+            RECIPES_URL, {"ingredients": f"{ingredient1.id},{ingredient2.id}"}
+        )
+
+        serializer1 = RecipeSerializer(recipe1)
+        serializer2 = RecipeSerializer(recipe2)
+        serializer3 = RecipeSerializer(recipe3)
+
+        self.assertIn(serializer1.data, resp.data)
+        self.assertIn(serializer2.data, resp.data)
+        self.assertNotIn(serializer3.data, resp.data)
